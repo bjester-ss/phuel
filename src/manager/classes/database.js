@@ -9,8 +9,8 @@
  * Changelog 
  * V 1.0.4 : TBD
  * V 1.0.3 : TBD
- * V 1.0.2 : TBD
- * V 1.0.1 : TBD
+ * V 1.0.3 : Added Node.js Functionality
+ * V 1.0.1 : Fixed Erroneous Code
  * V 1.0.0 : Initial Development
  */
 (function(Phuel,$,Ti){
@@ -22,7 +22,9 @@
 	var locale = Phuel.fn.locale;
 	var copy = Phuel.fn.copy;
 	var type = Phuel.fn.type;
+	var sys, sqlite = null;
 	
+	var debug = false;
 	
 	var open = {}; // Literal of open databases
 	var results = new Array(); // Array of result objects
@@ -40,6 +42,7 @@
 			this.db = db; // Reference to db that the result is from
 			this.id = id; // The results id (index in results array)
 			this.ti = ti; // Boolean if we are using Titanium db
+			this.node = this.db.node; // Boolean if we are using NODE.JS
 			
 			// Depending on db type, we set values appropriately
 			if(this.ti) {
@@ -74,6 +77,7 @@
 		db:"", // Db reference
 		id:-1, // Result id
 		ti:true, // Boolean whether using Titanium
+		node:false, // Boolean whether we're on NODE.JS
 		insertID:-1, // If data was inserted, this will have its new id
 		rowsAffected:-1, // Rows affected by db query
 		rows:0, // Quantity of returned rows by query
@@ -189,11 +193,9 @@
 			// Copy options
 			copy(this,ops);
 			// Databases have names
-			this.name = name;
+			this.name = name.replace(/\./,"_");
 			
 			if(locale.titanium && this.ti) {
-				// Remove any "." in the name
-				if(name.indexOf(".") >= 0) { this.name = name.replace(/\./,"_"); }
 				
 				// Make sure the db is not open
 				if(isN(open[name])) {
@@ -204,6 +206,22 @@
 					else {
 						open[name] = Ti.Database.openFile(Ti.Filesystem.getApplicationDataDirectory()+"\\"+name+".db"); // SQLite
 					}
+				}
+			}
+			else if(locale.nodejs) {
+				this.node = true;  // We're node.js-ing!
+				this.ti = false; // I dont think so
+				this.html5 = false; // Absolutely not
+				
+				if(isN(sqlite)) {
+					// Include our sqlite binding, if its not already
+					// Developed by grumdrig [github.com/grumdrig/node-sqlite]
+					sqlite = require('sqlite');
+				}
+				// Make sure the db is not open
+				if(isN(open[name])) {
+					var me = this;
+					open[name] = sqlite.openDatabaseSync(name); // SQLite
 				}
 			}
 			else {
@@ -225,13 +243,15 @@
 		size:1024*1024*20, // Size of the DB
 		description:"New Database", // Description
 		html5:true, // Do we want a Titanium HTML5 db
+		node:false, // Did we create a Node.js SQLite DB
 		ti:true, // Do we want a Titanium db
 		fault:false, // Is there a problem
 		properties:{
-			version:"1.0.0"
+			version:"1.0.2"
 		},
 		lastQuery:"", // Last executed query
 		execute:function(qu,arr,cb){
+			if(fault) { return false; }
 			// Get reference for Db
 			var db = open[this.name];
 			// Determine arguements types, and set appropriately
@@ -250,7 +270,7 @@
 				return cb.call(res,results.push(res)-1);	
 			}
 			else {
-				// Browser db is accessed asynchrously (standardly) and is standard to javascripts event nature (callbacks)
+				// Browser or Node db is accessed asynchrously (standardly) and is standard to javascripts event nature (callbacks)
 				var me = this;
 				// Start the communication with the db
 				db.transaction(function(tx){
@@ -273,6 +293,9 @@
 			else if(qu.indexOf("UPDATE") >= 0) {
 			}
 		},
+		error:function(err){
+			
+		},
 		results:function(id,cb) {
 			// Execute a function on a past result
 			if(id < results.length) {
@@ -280,17 +303,22 @@
 			}
 			return null;
 		},
-		debug:function(id){ return results[id];},
+		debug:function(id){ return (debug ? results[id] : false);},
 		releaseResult:function(id) {
 			// Called from DbResult.release
 			results[id]._release();
 			delete results[id];
 		},
 		"export":function(){},
+		close:function(){
+			open[this.name].close();
+			delete open[this.name];
+		},
 		extend:function(A) {
 			Phuel.fn.extend.call(this,A,true);
 		},
 		__destruct:function(A){
+			this.close();
 			delete this;
 		},
 		type:"database"
