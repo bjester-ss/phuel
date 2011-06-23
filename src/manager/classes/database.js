@@ -30,8 +30,8 @@
 	var cache = {}; // Literal of cached items for fast access, mostly used for just Titanium
 	
 	// Function to create and return object, without need to use word "new"
-	var DatabaseResult = function(A){ 
-		return new DatabaseResult.fn.__construct(A);
+	var DatabaseResult = function(A,b,c,d){ 
+		return new DatabaseResult.fn.__construct(A,b,c,d);
 	};
 	
 	// Specify prototype of Db result
@@ -182,7 +182,7 @@
 	// Start DB Def
 	
 	// -----------------------------------------------------------------------
-	var Database = function(A){ return new Database.fn.__construct(A);};
+	var Database = function(A,b){ return new Database.fn.__construct(A,b);};
 	
 	Database.fn = Database.prototype = {
 		__construct:function(name,ops){
@@ -202,7 +202,7 @@
 						open[name] = Ti.Database.open(name); // Ti HTML5
 					}
 					else {
-						open[this.name] = Ti.Database.openFile(name); // SQLite
+						open[name] = Ti.Database.openFile(Ti.Filesystem.getApplicationDataDirectory()+"\\"+name+".db"); // SQLite
 					}
 				}
 			}
@@ -245,9 +245,9 @@
 				// To maintain best compatibility, and execute in Titanium, we must use query applied to execute with any additional parameters in "arr"
 				var rc = db.execute.apply(db,([qu]).concat(arr));
 				// Create the result
-				var res = DatabaseResult(rc,resources.push(rc),this,true);
+				var res = DatabaseResult(rc,resources.push(rc)-1,this,true);
 				// Execute the callback
-				return cb.call(res,results.push(res));	
+				return cb.call(res,results.push(res)-1);	
 			}
 			else {
 				// Browser db is accessed asynchrously (standardly) and is standard to javascripts event nature (callbacks)
@@ -257,9 +257,9 @@
 					// Execute the query on the db
 					tx.execute(qu,arr,function(tx,result){
 						// Query executed, create the result
-						var res = DatabaseResult(result,resources.push(result),me,false);
+						var res = DatabaseResult(result,resources.push(result)-1,me,false);
 						// Call the callback
-						cb.call(res,results.push(res));
+						cb.call(res,results.push(res)-1);
 					},me.error);
 				});
 			}
@@ -280,6 +280,7 @@
 			}
 			return null;
 		},
+		debug:function(id){ return results[id];},
 		releaseResult:function(id) {
 			// Called from DbResult.release
 			results[id]._release();
