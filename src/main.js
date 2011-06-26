@@ -2,11 +2,12 @@
  * Author: Blaine Jester
  * Phuel Core
  * Created: 11/2/10
- * Last Edit: 5/23/11
+ * Last Edit: 6/26/11
  * Base of Phuel Core and System
- * Current Version: 1.1.2
+ * Current Version: 1.1.3
  *  
  * Changelog
+ * V 1.1.3 : Added 'last' array proto function
  * V 1.1.2 : Modified array sorting function to work correctly with number id's
  * V 1.1.1 : Changed parseVal to return NaN if no number is contained in the string
  * V 1.1.0 : Added NaN to isN definitions
@@ -92,7 +93,7 @@
 		},
 		locale:locale, // Load locale data into Phuel
 		properties:{
-			version:"1.1.2" // Expose version of this file
+			version:"1.1.3" // Expose version of this file
 		},
 		isN:isN, // Load isN function
 		type:type, // Load type function
@@ -282,8 +283,14 @@
 		return this;
 	};
 	
+	// Easily return the last item of the array
+	var last = function() {
+		return this[this.length - 1];
+	};
+	
 	// Extend standard array object with function
 	Array.prototype.sortBy = sortBy;
+	Array.prototype.last = last;
 	
 	// Extend Phuel prototype with parseVal function
 	Phuel.fn.extend({
