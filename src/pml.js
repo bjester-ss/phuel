@@ -30,7 +30,7 @@ tmpl /tmpls/standard/body.tpl
 tag meta $db(235) $db(236);
 ==============================================
 */
- (function(Phuel){
+(function(Phuel){
 	var global = this;
 	
 	var isN = Phuel.fn.isN;
@@ -39,7 +39,7 @@ tag meta $db(235) $db(236);
 	var database = (isN(Phuel.fn['database']) ? null : Phuel.fn.database);
 	
 	var rxLine = /^(.*?)$/gm;
-	var rxBreak = /\s\"(.*?)\"(?=\s|;)|((?:(?:\w*\/|\/)(?:\w[\w ]*))+\.(?:\w{1,3}))|(\$\w*\(.*?\))|([^\s;]*)/g;
+	var rxBreak = /\s\"(.*?)\"(?=\s|;)|((?:(?:\w*\/|\/)(?:\w[\w ]*))+\.(?:\w{1,3}))|(\$[\w\.]*\(.*?\))|([^\s;]*)/g;
 	//var rxBreak1 = /\"(.*?)\"|((?:(?:\w*\/|\/)(?:\w[\w ]*))+\.(?:\w{1,3}))|([^\s;]*)*/g;
 	var rxString = /\w/;
 	
@@ -66,14 +66,31 @@ tag meta $db(235) $db(236);
 				}
 			}
 			return ret;
+		},
+		define:function(name,value){
+			objectByArray(this.define,name.split(".")) = value;
 		}
 	};
 	var SYS = {
-		define:function(name,value){
-			this.define[name] = value;
+		_include:{
+			database:function(name) {
+				if(!isN(database)) {
+					return database(name,{});
+				}
+				else {
+					this.log.write("Phuel.fn.database is missing!");
+				}
+			}
 		},
+		define:CMD.define,
 		include:function(){
-			
+			var tye = arguments[0];
+			if(!isN(SYS._include[tye])) {
+				return SYS._include[tye].apply(this,arguments.slice(1));
+			}
+			else {
+				this.log.write("No include function found for '"+tye+"'");
+			}
 		}
 	};
 	
@@ -84,11 +101,15 @@ tag meta $db(235) $db(236);
 	pml.fn = pml.prototype = {
 		__construct:function(str) {
 			this.string = str;
+			this.define = {};
+			this.requires = [];
+			this.log._$ = ["Log Initialized!"];
 		},
 		string:"",
 		output:"",
+		requires:"",
 		lines:null,
-		define:{},
+		define:"",
 		interpret:function(){
 			var lns = (isN(this.lines) ? this.parse() : this.lines);
 			var str = "";
@@ -135,7 +156,20 @@ tag meta $db(235) $db(236);
 			var me = this;
 			(!isN(str) && type(str) == "string" ? str : this.string).replace(rxLine,function(a,b,c){
 				if(!rxString.test(b)) { return; }
-				ret.push(me.parseLine(b));
+				var line = me.parseLine(b);
+				if(line[0].charAt(0) == "#") {
+					(isN(str) ? me.requires.push(line) : true);
+					var k = me.interpretLine(line);
+					if(!isN(k) && type(k) == "array") {
+						for(var i = 0; i < k.length; i++) {
+							ret.push(k[i]);
+						}
+					}
+				}
+				else {
+					ret.push(line);
+				}
+				
 			});
 			return (isN(str) ? this.lines = ret : ret);
 		},
@@ -166,14 +200,18 @@ tag meta $db(235) $db(236);
 			}
 			return itm;
 		},
-		insert:function(stuff,index,cut){
+		insert:function(stuff,after,cut){
 			var t = type(stuff);
 			if(t == "string") {
-				return this.insert(this.parse(stuff),index,cut);
+				return this.insert(this.parse(stuff),after,cut);
 			}
 			else if(t == "array") {
-				
+				this.lines.splice.apply(this.lines,[after+1,0].concat(stuff));
 			}
+		},
+		remove:function(start,stop) {
+			stop = (isN(stop) ? start+1 : stop+1);
+			return this.lines.splice(start,stop-start);
 		},
 		addCommand:function(){
 			var t = type(arguments[0]);
@@ -183,6 +221,13 @@ tag meta $db(235) $db(236);
 			else if(arguments.length === 2 && t == "string" && type(arguments[1]) == "function" && isN(CMD[arguments[0]])) {
 				CMD[arguments[0]] = arguments[1];
 			}
+		},
+		log:{
+			_$:"",
+			write:function(){
+				return this._$.push.apply(this._$,arguments);
+			},
+			read:function(a){ return this._$[a];}
 		},
 		extend:function(A) {
 			Phuel.fn.extend.call(this,A,true);
