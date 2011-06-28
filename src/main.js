@@ -2,11 +2,12 @@
  * Author: Blaine Jester
  * Phuel Core
  * Created: 11/2/10
- * Last Edit: 6/26/11
+ * Last Edit: 6/28/11
  * Base of Phuel Core and System
  * Current Version: 1.1.3
  *  
  * Changelog
+ * V 1.1.4 : Added 'type' property to jQuery
  * V 1.1.3 : Added 'last' array proto function
  * V 1.1.2 : Modified array sorting function to work correctly with number id's
  * V 1.1.1 : Changed parseVal to return NaN if no number is contained in the string
@@ -93,7 +94,7 @@
 		},
 		locale:locale, // Load locale data into Phuel
 		properties:{
-			version:"1.1.3" // Expose version of this file
+			version:"1.1.4" // Expose version of this file
 		},
 		isN:isN, // Load isN function
 		type:type, // Load type function
@@ -146,6 +147,10 @@
 	// Expose
 	this.Phuel = Phuel;
 	
+	// Add a type to jQuery, most likely overwrites type function of jQuery >= 1.4.3
+	if(locale.jquery) {
+		global.jQuery.fn.extend({type:"jquery"});
+	}
 })();
 
 
