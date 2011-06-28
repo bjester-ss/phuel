@@ -7,6 +7,7 @@
  * Current Version: 1.1.3
  *  
  * Changelog
+ * V 1.1.5 : Added 'trim' string function
  * V 1.1.4 : Added 'type' property to jQuery
  * V 1.1.3 : Added 'last' array proto function
  * V 1.1.2 : Modified array sorting function to work correctly with number id's
@@ -94,7 +95,7 @@
 		},
 		locale:locale, // Load locale data into Phuel
 		properties:{
-			version:"1.1.4" // Expose version of this file
+			version:"1.1.5" // Expose version of this file
 		},
 		isN:isN, // Load isN function
 		type:type, // Load type function
@@ -228,6 +229,15 @@
 		var m = this.next(search,0);
 		return (m >= 0 ? pos-m : -1);
 	};
+	
+	// Trims whitespace before and after string
+	var trim = function(str) {
+		return (isN(str) ? this : str).replace(/^\s*(.*?)\s*$/,"$1");
+	};
+	
+	if(isN(String.prototype["trim"])) {
+		String.prototype.trim = trim;
+	}
 	
 	// Extend standard string object with functions
 	String.prototype.parseVal = parseVal;
