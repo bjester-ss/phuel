@@ -8,10 +8,10 @@
 (function(Phuel){
 	var window = this;
 	var isN = Phuel.fn.isN;
-	var type = Phuel.fn.isN;
+	var type = Phuel.fn.type;
 	var locale = Phuel.fn.locale;
 	
-	var Cookie = function(nm) {
+	var Cookie = function(name,response) {
 		return new Cookie.fn.__construct(name,response);
 	};
 	
