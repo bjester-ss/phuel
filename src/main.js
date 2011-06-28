@@ -7,6 +7,7 @@
  * Current Version: 1.1.3
  *  
  * Changelog
+ * V 1.1.6 : Added 'unique' array function
  * V 1.1.5 : Added 'trim' string function
  * V 1.1.4 : Added 'type' property to jQuery
  * V 1.1.3 : Added 'last' array proto function
@@ -95,7 +96,7 @@
 		},
 		locale:locale, // Load locale data into Phuel
 		properties:{
-			version:"1.1.5" // Expose version of this file
+			version:"1.1.6" // Expose version of this file
 		},
 		isN:isN, // Load isN function
 		type:type, // Load type function
@@ -303,9 +304,22 @@
 		return this[this.length - 1];
 	};
 	
+	// Array Unique Function
+	var unique = function(arr){
+		arr = (isN(arr) ? this : arr).sort();
+		var  len = arr.length, nw = (len >= 1 ? [arr[0]] : []);
+		for(var i = 1; i < len; i++) {
+			if(nw.last() != arr[i]) {
+				nw.push(arr[i]);
+			}
+		}
+		return nw;
+	};
+	
 	// Extend standard array object with function
 	Array.prototype.sortBy = sortBy;
 	Array.prototype.last = last;
+	Array.prototype.unique = unique;
 	
 	// Extend Phuel prototype with parseVal function
 	Phuel.fn.extend({
