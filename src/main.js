@@ -26,15 +26,15 @@
 	var global = this;
 	
 	// Set up a function to return the new Object without the need to use the "new" keyword
-	var Phuel = function(A){ 
-		return new Phuel.fn.__construct(A);
+	var Phuel = function(blank){ 
+		return new Phuel.fn.__construct(blank);
 	};
 	
 	// isN function checks to see if the arugment is Null, undefined, empty string (""), or false
-	var isN = function(A) {
+	var isN = function(isItNull) {
 		// Safe to use try catch for undefined items
 		try {
-			var B = (A == undefined || A == null || A == "" || A == false || typeof A == "undefined" || A == NaN);
+		    var B = (isItNull == undefined || isItNull == null || isItNull == "" || isItNull == false || typeof isItNull == "undefined" || isItNull == NaN);
 		}
 		catch(e) {
 			var B = true;
@@ -43,27 +43,27 @@
 	};
 	
 	// Copy's data from object B to object A, recursively if D is true
-	var copy = function(A,B,D) {
-		if(isN(B)) { return A;}
-		for(var k in B) {
-			// Are we recursively copying if source is an object?
-			if(!isN(D) && type(B[k]) == "object") {
-				A[k] = copy({},B[k],true);
+	var copy = function(to,from,recurse) {
+		if(isN(from)) { return to;}
+		for(var k in from) {
+		    // Are we recursively copying if source is an object?
+			if(!isN(recurse) && type(from[k]) == "object") {
+				to[k] = copy({},from[k],true);
 			}
 			else {
 				// Since no recurse and source is not an object
-				if(type(B[k]) != "object") {
+				if(type(from[k]) != "object") {
 					// Copy normal
-					A[k] = B[k];
+					to[k] = from[k];
 				}
 				else {
 					// Since source was an object, set destination with string
-					A[k] = "object";
+					to[k] = "object";
 				}
 				
 			}
 		}
-		return A;
+		return to;
 	};
 	
 	// The standard data types in Javascript
@@ -82,8 +82,8 @@
 	
 	// Check the type of an object, or variable
 	// New classes should create a "type" property, ex. MyObject.type = "myobject"
-	var type = function(A) {
-		return (isN(A)? "undefined" : ((isN(A['type'])) ?(types[Object.prototype.toString.call(A)]) :(A.type)));
+	var type = function(multiType) {
+	    return (isN(multiType) ? "undefined" : ((isN(multiType['type'])) ? (types[Object.prototype.toString.call(multiType)]) : (multiType.type)));
 	};
 	
 	// List of standard types, used by the type function
@@ -100,36 +100,36 @@
 		},
 		isN:isN, // Load isN function
 		type:type, // Load type function
-		each:function(A,B){ // Custom Iterator, used possibly in place of loop
+		each:function(object,iterator){ // Custom Iterator, used possibly in place of loop
 			// If object A is an array, get its length
-			var length = A.length, brk = false;
+		    var length = object.length, brk = false;
 			
 			// Its not an array if length is undefined
 			if(isN(length)) {
 				// Use object for loop
-				for(var o in A) {
-					brk = B(o,A[o]); // Send data to function for operation
+			    for (var o in object) {
+			        brk = iterator(o, object[o]); // Send data to function for operation
 					if(brk){break;} // Stop if returned data from B is true
 				}
 			}
 			else {
 				// Loop through array
 				for(var i = 0; i < length; i++) {
-					brk = B(i,A[i]); // Send data to function for operation
+				    brk = iterator(i, object[i]); // Send data to function for operation
 					if(brk){break;} // Stop if returned data from B is true
 				}
 			}
 		},
-		extend:function(A,D) { // Extend/Add to Phuel object, as is customary operation for all additions
-			var B = type(A), C = this;
-			D = (isN(D) ? false : true);
-			if(B == "object") { for(var op in A) { if(!C[op] || D) { C[op] = A[op];} }}
+		extend:function(extender,overwrite) { // Extend/Add to Phuel object, as is customary operation for all additions
+		    var B = type(extender), C = this;
+		    overwrite = (isN(overwrite) ? false : true);
+		    if (B == "object") { for (var op in extender) { if (!C[op] || overwrite) { C[op] = extender[op]; } } }
 		},
 		copy:copy, // Add copy to Phuel
-		scan:function(A,B) { // Make an exact copy of an object
-			return copy(copy({},A),B);
+		scan: function (paper, addition) { // Make an exact copy of an object
+			return copy(copy({},paper),addition);
 		},
-		ping:function(A) {return A;}, // Ping function sends argument directly back
+		ping:function(ret) {return ret;}, // Ping function sends argument directly back
 		__destruct:function(A){ // Create function to delete itself
 			delete this;
 		}
@@ -147,7 +147,7 @@
 	Phuel.extend = Phuel.fn.extend;
 	
 	// Expose
-	this.Phuel = Phuel;
+	global.Phuel = Phuel;
 	
 	// Add a type to jQuery, most likely overwrites type function of jQuery >= 1.4.3
 	if(locale.jquery) {
@@ -162,14 +162,13 @@
  * Date: 12/16/10
  * Works with: Browser, HTML5, Titanium, NodeJS
  */
-(function(Phuel){
+(function(){
 		  
 	// Import the dependent functions from the core
 	var isN = Phuel.fn.isN;
 	var type = Phuel.fn.type;
 	var ping = Phuel.fn.ping;
 	var json = Phuel.fn.json;
-	
 	
 	var returnVal = function() {
 		return this.valueOf();
@@ -250,7 +249,7 @@
 		parseVal:parseVal
 	});
 	
-})(Phuel);
+})();
 
 /* 
  * Author: Blaine Jester
@@ -258,7 +257,7 @@
  * Date: 5/21/11
  * Works with: Browser, HTML5, Titanium, NodeJS
  */
-(function(Phuel){
+(function(){
 		  
 	// Import the dependent functions from the core
 	var isN = Phuel.fn.isN;
@@ -266,34 +265,34 @@
 	var parseVal = Phuel.fn.parseVal;
 	
 	// SortBy function, dir = true means reverse
-	var sortBy = function(by,dir) {
+	var sortBy = function(sortBy,direction) {
 		// Check to make array has elements
 		if(this.length >= 0) {
 			// SortBy can sort an arrray that containes objects or arrays, as long as 'by' is defined
 			if(type(this[0]) == "object" || "array") {
 				// Is 'by' index defined
-				if(!isN(this[0][by])) {
+				if(!isN(this[0][sortBy])) {
 					// Sort the array appropriately
 					return this.sort(function(a,b){
 						// Are both values strings or numbers?
-						if(isN(parseVal(a[by])) && type(a[by]) == type(b[by]) == "string") {
+						if(isN(parseVal(a[sortBy])) && type(a[sortBy]) == type(b[sortBy]) == "string") {
 							// Easiest method for alphabetically sorting is using native array sort
-							var chk = [a[by],b[by]].sort();
+							var chk = [a[sortBy],b[sortBy]].sort();
 							// Reverse if its asked
-							chk = (isN(dir) ? chk : chk.reverse());
+							chk = (isN(direction) ? chk : chk.reverse());
 							// Return a value depending which value should come first, -1 means a before b
-							return (chk[0] == a[by] ? -1 : 1);
+							return (chk[0] == a[sortBy] ? -1 : 1);
 						}
-						else if(!isN(parseVal(a[by])) && type(parseVal(a[by])) == type(parseVal(b[by])) == "number") {
+						else if(!isN(parseVal(a[sortBy])) && type(parseVal(a[sortBy])) == type(parseVal(b[sortBy])) == "number") {
 							// a before b if its negative
-							return (isN(dir) ? a[by] - b[by] : b[by] - a[by]);
+							return (isN(direction) ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]);
 						}
 					});
 				}
 			}
 			else if(type(this[0]) == "string") {
 				// If array is normal, sort normal
-				return (isN(dir) ? this.sort() : this.sort().reverse());
+				return (isN(direction) ? this.sort() : this.sort().reverse());
 			}
 		}
 		return this;
@@ -323,11 +322,11 @@
 	
 	// Extend Phuel prototype with parseVal function
 	Phuel.fn.extend({
-		sortBy:function(ob,by,dir) {
-			return sortBy.call(ob,by,dir);
+		sortBy:function(toSort,sortBy,direction) {
+			return sortBy.call(toSort,sortBy,direction);
 		}
 	});
 	
 	this.sortByTest = [{name:"apple"},{name:"Aa"},{name:"Az"},{name:"Bob"},{name:"bath"},{name:"bz"},{name:"qu"},{name:"za"}];
 	
-})(Phuel);
+})();
