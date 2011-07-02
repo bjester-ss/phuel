@@ -26,13 +26,18 @@
 	var global = this;
 	
 	// Set up a function to return the new Object without the need to use the "new" keyword
-	var Phuel = function(blank){ 
+	var Phuel = function(blank){
+        /// <summary>Phuel Constructor Reference Function</summary>
+        /// <param name="blank" type="*">Blank (not currently used)</param>
+        /// <returns type="phuel">Returns a new Phuel object</returns>
 		return new Phuel.fn.__construct(blank);
 	};
 	
 	// isN function checks to see if the arugment is Null, undefined, empty string (""), or false
 	var isN = function(isItNull) {
-		// Safe to use try catch for undefined items
+		/// <summary>Is it Null function, includes "",false, and NaN</summary>
+        /// <param name="isItNull" type="*">isItNull</param>
+        /// <returns type="boolean">Returns whether or not item is NULL</returns>
 		try {
 		    var B = (isItNull == undefined || isItNull == null || isItNull == "" || isItNull == false || typeof isItNull == "undefined" || isItNull == NaN);
 		}
@@ -42,8 +47,12 @@
 		return B;
 	};
 	
-	// Copy's data from object B to object A, recursively if D is true
 	var copy = function(to,from,recurse) {
+        /// <summary>Copies data from one object to another</summary>
+        /// <param name="to" type="object">Object to copy to</param>
+        /// <param name="from" type="object">Object to copy from</param>
+        /// <param name="recurse" type="boolean" optional="true">Boolean whether to recurse</param>
+        /// <returns type="object">Returns original 'to' object</returns>
 		if(isN(from)) { return to;}
 		for(var k in from) {
 		    // Are we recursively copying if source is an object?
@@ -83,6 +92,9 @@
 	// Check the type of an object, or variable
 	// New classes should create a "type" property, ex. MyObject.type = "myobject"
 	var type = function(multiType) {
+        /// <summary>Determines the type of the item</summary>
+        /// <param name="multiType" type="*">Item to determine its type</param>
+        /// <returns type="string">Returns string of type</returns>
 	    return (isN(multiType) ? "undefined" : ((isN(multiType['type'])) ? (types[Object.prototype.toString.call(multiType)]) : (multiType.type)));
 	};
 	
@@ -101,6 +113,10 @@
 		isN:isN, // Load isN function
 		type:type, // Load type function
 		each:function(object,iterator){ // Custom Iterator, used possibly in place of loop
+            /// <summary>Interates over object using iterator function</summary>
+            /// <param name="object" type="object || array">Object or array to iterate over</param>
+            /// <param name="iterator" type="function">The iterator function</param>
+            /// <returns type="void"></returns>
 			// If object A is an array, get its length
 		    var length = object.length, brk = false;
 			
@@ -121,12 +137,20 @@
 			}
 		},
 		extend:function(extender,overwrite) { // Extend/Add to Phuel object, as is customary operation for all additions
+            /// <summary>Extends an object, similar to copy</summary>
+            /// <param name="extender" type="object">Object literal to iterate over and extend</param>
+            /// <param name="overwrite" type="boolean" optional="true">Whether or not to overwrite name if its allocated</param>
+            /// <returns type="void"></returns>
 		    var B = type(extender), C = this;
 		    overwrite = (isN(overwrite) ? false : true);
 		    if (B == "object") { for (var op in extender) { if (!C[op] || overwrite) { C[op] = extender[op]; } } }
 		},
 		copy:copy, // Add copy to Phuel
 		scan: function (paper, addition) { // Make an exact copy of an object
+            /// <summary>Scans an object and returns an exact copy, with any additions</summary>
+            /// <param name="paper" type="object">Object to scan</param>
+            /// <param name="addition" type="object" optional="true">Object to copy onto scanned copy</param>
+            /// <returns type="object">Returns the scanned copy with any additions</returns>
 			return copy(copy({},paper),addition);
 		},
 		ping:function(ret) {return ret;}, // Ping function sends argument directly back
@@ -176,6 +200,9 @@
 	
 	// Revision of native parseInt and parseFloat function, works with strings starting with 0
 	var parseVal = function(val) {
+        /// <summary>Parses the numerical value of a string</summary>
+        /// <param name="val" type="string" optional="true">String to parse, defaults to this when this is a string</param>
+        /// <returns type="number">Returns the parsed value</returns>
 		// Determine the context, with which the function is called
 		if(isN(val) && type(this) == "string") {
 			// Set string variable
@@ -207,6 +234,10 @@
 	
 	// Find the next occurance search string or regexp starting at index "pos"
 	var next = function(search,pos) {
+        /// <summary>Searches for the next occurance of search in string</summary>
+        /// <param name="search" type="string || regexp">The search string or regex</param>
+        /// <param name="pos" type="number" optional="true">Starting index position, defaults to 0</param>
+        /// <returns type="number">Returns the index</returns>
 		// Determine type of search
 		if(type(search) == "string") {
 			// Use native function to find the next occurance, since search is a string
@@ -225,6 +256,10 @@
 	
 	// Find the previous occurance search string or regexp starting at index "pos"
 	var prev = function(search,pos) {
+        /// <summary>Searches for the previous occurance of search in string</summary>
+        /// <param name="search" type="string || regexp">The search string or regex</param>
+        /// <param name="pos" type="number>Starting index position</param>
+        /// <returns type="number">Returns the index</returns>
 		var st = this.substring(0,pos).split("").reverse().join("");
 		var m = this.next(search,0);
 		return (m >= 0 ? pos-m : -1);
@@ -232,6 +267,9 @@
 	
 	// Trims whitespace before and after string
 	var trim = function(str) {
+        /// <summary>Trims whitespace from before and after string</summary>
+        /// <param name="str" type="string" optional="true">The search to trim, defaults to this</param>
+        /// <returns type="string">Returns the trimmed string</returns>
 		return (isN(str) ? this : str).replace(/^\s*(.*?)\s*$/,"$1");
 	};
 	
@@ -266,6 +304,10 @@
 	
 	// SortBy function, dir = true means reverse
 	var sortBy = function(sortBy,direction) {
+        /// <summary>Sorts the array, including when elements are objects</summary>
+        /// <param name="sortBy" type="string">The property to sort the objects by</param>
+        /// <param name="direction" type="boolean" optional="true">The sort direction, defaults to false (meaning increasing)</param>
+        /// <returns type="string">Returns the sorted array</returns>
 		// Check to make array has elements
 		if(this.length >= 0) {
 			// SortBy can sort an arrray that containes objects or arrays, as long as 'by' is defined
@@ -300,11 +342,16 @@
 	
 	// Easily return the last item of the array
 	var last = function() {
+        /// <summary>Gets the last element in the array</summary>
+        /// <returns type="*">Returns the element</returns>
 		return this[this.length - 1];
 	};
 	
 	// Array Unique Function
 	var unique = function(arr){
+        /// <summary>Cleans the array, removing duplicate elements</summary>
+        /// <param name="arr" type="array" optional="true">The array to make unique, defaults to this</param>
+        /// <returns type="array">Returns the unique array</returns>
 		arr = (isN(arr) ? this : arr).sort();
 		var  len = arr.length, nw = (len >= 1 ? [arr[0]] : []);
 		for(var i = 1; i < len; i++) {
