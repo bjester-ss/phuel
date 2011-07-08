@@ -2,11 +2,12 @@
  * Author: Blaine Jester
  * Phuel Core
  * Created: 11/2/10
- * Last Edit: 6/28/11
+ * Last Edit: 7/8/11
  * Base of Phuel Core and System
- * Current Version: 1.1.3
+ * Current Version: 1.1.7
  *  
  * Changelog
+ * V 1.1.7 : Modified parseVal function
  * V 1.1.6 : Added 'unique' array function
  * V 1.1.5 : Added 'trim' string function
  * V 1.1.4 : Added 'type' property to jQuery
@@ -21,162 +22,163 @@
  *
  *
  */
-(function(){
-	// Give "this" a better name from within anonymous function, which is the global scope or everything in window.*
-	var global = this;
-	
-	// Set up a function to return the new Object without the need to use the "new" keyword
-	var Phuel = function(blank){
+(function () {
+    // Give "this" a better name from within anonymous function, which is the global scope or everything in window.*
+    var global = this;
+
+    // Set up a function to return the new Object without the need to use the "new" keyword
+    var Phuel = function (blank) {
         /// <summary>Phuel Constructor Reference Function</summary>
         /// <param name="blank" type="*">Blank (not currently used)</param>
         /// <returns type="phuel">Returns a new Phuel object</returns>
-		return new Phuel.fn.__construct(blank);
-	};
-	
-	// isN function checks to see if the arugment is Null, undefined, empty string (""), or false
-	var isN = function(isItNull) {
-		/// <summary>Is it Null function, includes "",false, and NaN</summary>
+        return new Phuel.fn.__construct(blank);
+    };
+
+    // isN function checks to see if the arugment is Null, undefined, empty string (""), or false
+    var isN = function (isItNull) {
+        /// <summary>Is it Null function, includes "",false, and NaN</summary>
         /// <param name="isItNull" type="*">isItNull</param>
         /// <returns type="boolean">Returns whether or not item is NULL</returns>
-		try {
-		    var B = (isItNull == undefined || isItNull == null || isItNull == "" || isItNull == false || typeof isItNull == "undefined" || isItNull == NaN);
-		}
-		catch(e) {
-			var B = true;
-		}
-		return B;
-	};
-	
-	var copy = function(to,from,recurse) {
+        try {
+            var B = (isItNull == undefined || isItNull == null || isItNull == "" || isItNull == false || typeof isItNull == "undefined" || isItNull == NaN);
+        }
+        catch (e) {
+            var B = true;
+        }
+        return B;
+    };
+
+    var copy = function (to, from, recurse) {
         /// <summary>Copies data from one object to another</summary>
         /// <param name="to" type="object">Object to copy to</param>
         /// <param name="from" type="object">Object to copy from</param>
         /// <param name="recurse" type="boolean" optional="true">Boolean whether to recurse</param>
         /// <returns type="object">Returns original 'to' object</returns>
-		if(isN(from)) { return to;}
-		for(var k in from) {
-		    // Are we recursively copying if source is an object?
-			if(!isN(recurse) && type(from[k]) == "object") {
-				to[k] = copy({},from[k],true);
-			}
-			else {
-				// Since no recurse and source is not an object
-				if(type(from[k]) != "object") {
-					// Copy normal
-					to[k] = from[k];
-				}
-				else {
-					// Since source was an object, set destination with string
-					to[k] = "object";
-				}
-				
-			}
-		}
-		return to;
-	};
-	
-	// The standard data types in Javascript
-	var standardTypes = "Boolean Number String Function Array Date RegExp Object";
-	
-	// Detect details or features of the locale
-	var locale = {
-		jquery:!isN(global['jQuery']), // Is jQuery available
-		storage:!isN(global["localStorage"]), // Is the HTML5 storage object available, if true and titanium = false, we are in an HTML5 supporting browser
-		console:!isN(global["console"]), // Is the console available
-		titanium:!isN(global['Titanium']), // Are we in a Titanium app, if false, and nodejs is false, we are in a browser
-		json:!isN(global['JSON']), // Is native JSON available
-		nodejs:(!isN(global['Buffer']) && !isN(global['require'])), // Are we on a server running Node.js
-		isIE:null // To be set, are we in IE
-	};
-	
-	// Check the type of an object, or variable
-	// New classes should create a "type" property, ex. MyObject.type = "myobject"
-	var type = function(multiType) {
+        if (isN(from)) { return to; }
+        for (var k in from) {
+            // Are we recursively copying if source is an object?
+            if (!isN(recurse) && type(from[k]) == "object") {
+                to[k] = copy({}, from[k], true);
+            }
+            else {
+                // Since no recurse and source is not an object
+                if (type(from[k]) != "object") {
+                    // Copy normal
+                    to[k] = from[k];
+                }
+                else {
+                    // Since source was an object, set destination with string
+                    to[k] = "object";
+                }
+
+            }
+        }
+        return to;
+    };
+
+    // The standard data types in Javascript
+    var standardTypes = "Boolean Number String Function Array Date RegExp Object";
+
+    // Detect details or features of the locale
+    var locale = {
+        jquery: !isN(global['jQuery']), // Is jQuery available
+        storage: !isN(global["localStorage"]), // Is the HTML5 storage object available, if true and titanium = false, we are in an HTML5 supporting browser
+        console: !isN(global["console"]), // Is the console available
+        titanium: !isN(global['Titanium']), // Are we in a Titanium app, if false, and nodejs is false, we are in a browser
+        json: !isN(global['JSON']), // Is native JSON available
+        nodejs: (!isN(global['Buffer']) && !isN(global['require'])), // Are we on a server running Node.js
+        isIE: null // To be set, are we in IE
+    };
+
+    // Check the type of an object, or variable
+    // New classes should create a "type" property, ex. MyObject.type = "myobject"
+    var type = function (multiType) {
         /// <summary>Determines the type of the item</summary>
         /// <param name="multiType" type="*">Item to determine its type</param>
         /// <returns type="string">Returns string of type</returns>
-	    return (isN(multiType) ? "undefined" : ((isN(multiType['type'])) ? (types[Object.prototype.toString.call(multiType)]) : (multiType.type)));
-	};
-	
-	// List of standard types, used by the type function
-	var types = {};
-	
-	// Prototype of Phuel, with shorthand of "fn"
-	Phuel.fn = Phuel.prototype = {
-		__construct:function(A){
-			// Do any initial construction of Phuel object
-		},
-		locale:locale, // Load locale data into Phuel
-		properties:{
-			version:"1.1.6" // Expose version of this file
-		},
-		isN:isN, // Load isN function
-		type:type, // Load type function
-		each:function(object,iterator){ // Custom Iterator, used possibly in place of loop
+        return (isN(multiType) ? "undefined" : ((isN(multiType['type'])) ? (types[Object.prototype.toString.call(multiType)]) : (multiType.type)));
+    };
+
+    // List of standard types, used by the type function
+    var types = {};
+
+    // Prototype of Phuel, with shorthand of "fn"
+    Phuel.fn = Phuel.prototype = {
+        __construct: function (A) {
+            // Do any initial construction of Phuel object
+        },
+        locale: locale, // Load locale data into Phuel
+        properties: {
+            version: "1.1.7" // Expose version of this file
+        },
+        isN: isN, // Load isN function
+        type: type, // Load type function
+        each: function (object, iterator) { // Custom Iterator, used possibly in place of loop
             /// <summary>Interates over object using iterator function</summary>
             /// <param name="object" type="object || array">Object or array to iterate over</param>
             /// <param name="iterator" type="function">The iterator function</param>
             /// <returns type="void"></returns>
-			// If object A is an array, get its length
-		    var length = object.length, brk = false;
-			
-			// Its not an array if length is undefined
-			if(isN(length)) {
-				// Use object for loop
-			    for (var o in object) {
-			        brk = iterator(o, object[o]); // Send data to function for operation
-					if(brk){break;} // Stop if returned data from B is true
-				}
-			}
-			else {
-				// Loop through array
-				for(var i = 0; i < length; i++) {
-				    brk = iterator(i, object[i]); // Send data to function for operation
-					if(brk){break;} // Stop if returned data from B is true
-				}
-			}
-		},
-		extend:function(extender,overwrite) { // Extend/Add to Phuel object, as is customary operation for all additions
+            // If object A is an array, get its length
+            var length = object.length, brk = false;
+
+            // Its not an array if length is undefined
+            if (isN(length)) {
+                // Use object for loop
+                for (var o in object) {
+                    brk = iterator(o, object[o]); // Send data to function for operation
+                    if (brk) { break; } // Stop if returned data from B is true
+                }
+            }
+            else {
+                // Loop through array
+                for (var i = 0; i < length; i++) {
+                    brk = iterator(i, object[i]); // Send data to function for operation
+                    if (brk) { break; } // Stop if returned data from B is true
+                }
+            }
+            
+        },
+        extend: function (extender, overwrite) { // Extend/Add to Phuel object, as is customary operation for all additions
             /// <summary>Extends an object, similar to copy</summary>
             /// <param name="extender" type="object">Object literal to iterate over and extend</param>
             /// <param name="overwrite" type="boolean" optional="true">Whether or not to overwrite name if its allocated</param>
             /// <returns type="void"></returns>
-		    var B = type(extender), C = this;
-		    overwrite = (isN(overwrite) ? false : true);
-		    if (B == "object") { for (var op in extender) { if (!C[op] || overwrite) { C[op] = extender[op]; } } }
-		},
-		copy:copy, // Add copy to Phuel
-		scan: function (paper, addition) { // Make an exact copy of an object
+            var B = type(extender), C = this;
+            overwrite = (isN(overwrite) ? false : true);
+            if (B == "object") { for (var op in extender) { if (!C[op] || overwrite) { C[op] = extender[op]; } } }
+        },
+        copy: copy, // Add copy to Phuel
+        scan: function (paper, addition) { // Make an exact copy of an object
             /// <summary>Scans an object and returns an exact copy, with any additions</summary>
             /// <param name="paper" type="object">Object to scan</param>
             /// <param name="addition" type="object" optional="true">Object to copy onto scanned copy</param>
             /// <returns type="object">Returns the scanned copy with any additions</returns>
-			return copy(copy({},paper),addition);
-		},
-		ping:function(ret) {return ret;}, // Ping function sends argument directly back
-		__destruct:function(A){ // Create function to delete itself
-			delete this;
-		}
-	};
-	
-	// Initialize the types object with the standard list
-	Phuel.fn.each(standardTypes.split(" "), function(i, name) {
-		types[ "[object " + name + "]" ] = name.toLowerCase();
-	});
-	
-	// Set the object prototype correctly to work with the intializer function, for use without "new" keyword
-	Phuel.fn.__construct.prototype = Phuel.fn;
-	
-	// Add ability to extend intialized Phuel object and not the prototype
-	Phuel.extend = Phuel.fn.extend;
-	
-	// Expose
-	global.Phuel = Phuel;
-	
-	// Add a type to jQuery, most likely overwrites type function of jQuery >= 1.4.3
-	if(locale.jquery) {
-		global.jQuery.fn.extend({type:"jquery"});
-	}
+            return copy(copy({}, paper), addition);
+        },
+        ping: function (ret) { return ret; }, // Ping function sends argument directly back
+        __destruct: function (A) { // Create function to delete itself
+            delete this;
+        }
+    };
+
+    // Initialize the types object with the standard list
+    Phuel.fn.each(standardTypes.split(" "), function (i, name) {
+        types["[object " + name + "]"] = name.toLowerCase();
+    });
+
+    // Set the object prototype correctly to work with the intializer function, for use without "new" keyword
+    Phuel.fn.__construct.prototype = Phuel.fn;
+
+    // Add ability to extend intialized Phuel object and not the prototype
+    Phuel.extend = Phuel.fn.extend;
+
+    // Expose
+    global.Phuel = Phuel;
+
+    // Add a type to jQuery, most likely overwrites type function of jQuery >= 1.4.3
+    if (locale.jquery) {
+        global.jQuery.fn.extend({ type: "jquery" });
+    }
 })();
 
 
@@ -209,15 +211,8 @@
 			val = this;
 		}
 		
-		// Loop while checking if first character is 0
-		while (val.charAt(0) == '0' || isNaN(val.charAt(0))) {
-			// Skip if we find a possible start to a float
-			if(val.charAt(1) == ".") {
-				break;
-			}
-			// Since we think we are at the start of a number, reset string val
-			val = val.substring(1, val.length);
-		}
+		// Grab the first string of numbers
+		val = val.replace(/([^\d]*)(0\.\d*|\d*)(.*)/,"$2");
 		
 		if (val == "") {
 			// If there is nothing left in string, default to 0
@@ -225,7 +220,7 @@
 		}
 		else {
 			// Now use native functions to pull out number
-			val = (val.indexOf(".") >= 0 ? parseFloat(val) : parseInt(val));
+			val = (/\./.test(val) ? parseFloat(val) : parseInt(val));
 		}
 		
 		// Return value
@@ -235,7 +230,7 @@
 	// Find the next occurance search string or regexp starting at index "pos"
 	var next = function(search,pos) {
         /// <summary>Searches for the next occurance of search in string</summary>
-        /// <param name="search" type="string || regexp">The search string or regex</param>
+        /// <param name="search" type="string||regexp">The search string or regex</param>
         /// <param name="pos" type="number" optional="true">Starting index position, defaults to 0</param>
         /// <returns type="number">Returns the index</returns>
 		// Determine type of search
@@ -257,7 +252,7 @@
 	// Find the previous occurance search string or regexp starting at index "pos"
 	var prev = function(search,pos) {
         /// <summary>Searches for the previous occurance of search in string</summary>
-        /// <param name="search" type="string || regexp">The search string or regex</param>
+        /// <param name="search" type="string||regexp">The search string or regex</param>
         /// <param name="pos" type="number>Starting index position</param>
         /// <returns type="number">Returns the index</returns>
 		var st = this.substring(0,pos).split("").reverse().join("");
@@ -377,3 +372,4 @@
 	this.sortByTest = [{name:"apple"},{name:"Aa"},{name:"Az"},{name:"Bob"},{name:"bath"},{name:"bz"},{name:"qu"},{name:"za"}];
 	
 })();
+

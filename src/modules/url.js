@@ -1,58 +1,60 @@
+/// <reference path="../main.js" />
+/// <reference path="../json.js" />
 /* 
- * Author: Blaine Jester
- * Url Module/Function -- Adds to Phuel Class
- * Date: 12/16/10
- * Works with: Browser, HTML5, Titanium
- */
-(function(Phuel){
-		  
-	var isN = Phuel.fn.isN;
-	
-	var separate = function(M) {
-		var ret = {};
-		for(var i = 0; i < M.length; i++) {
-			M[i] = M[i].split("=");
-			ret[M[i][0]] = (isN(M[i][1]) ? "" : M[i][1]);
-		}
-		return ret;
-	};
-	
-	if(!Phuel.fn.locale.nodejs) {
-		var url = function(A){
-			if(isN(A)) { 
-				A = window.location.href;
-			}
-			var B = A.split("/")[2], C = A.split("?"), D = A.split("#");
-			var ret = {
-				domain:B,
-				url:A,
-				tld:B.split(".").pop(),
-				secure:(A.indexOf("https://") >= 0),
-				query:{},
-				hash:{
-					call:((D.length > 1)? (D[1].split("?")[0]) : ("")),
-					query:{}
-				},
-				path:C[0].split("/").slice(3)
-			};
-			
-			if(C.length > 1) {
-				ret.query = separate(C[1].split("#")[0].split("&"));
-			}
-			if(C.length > 2 && D.length > 1) {
-				ret.hash.query = separate(C[2].split("&"));
-			}
-			
-			return ret;
-		};
-	}
-	else {
-		// TO DO
-		// Create transfer interface for node
-	}
-	
-	Phuel.fn.extend({
-		url:url
-	});
-	
-})(Phuel);
+* Author: Blaine Jester
+* Phuel Url Parser
+* Created: 11/2/10
+* Last Edit: 7/8/11
+* Phuel Module
+* Current Version: 1.0.1
+*  
+* Changelog
+* V 1.0.2 : TBD
+* V 1.0.1 : Revised with RegExp's
+* V 1.0.0 : Original
+*
+*
+*/
+(function () {
+
+    var isN = Phuel.fn.isN;
+    var json = Phuel.fn.json;
+
+    var parse = function (M) {
+        return '{' + M.replace(/([\w\d]*)=([^&]*)/g, '"$1":"$2"').replace(/&/g, ",") + '}'; ;
+    };
+
+    if (!Phuel.fn.locale.nodejs) {
+        var Url = function (url) {
+            /// <summary>Parses a url or the current one</summary>
+            /// <param name="url" type="string" optional="true">The url to parse, defaults to window.location.href</param>
+            /// <returns type="object">An object containing url data</returns>
+            if (isN(url)) {
+                url = window.location.href;
+            }
+            var reg = /(http)(s|):\/\/([\w\d\.]*\.(\w{1,3}))(\/.*)(\?|#)(.*)/;
+            var ret = {
+                secure: (url.replace(reg, "$2") == "s"),
+                tld: url.replace(reg, "$4"),
+                domain: url.replace(reg, "$3"),
+                path: url.replace(reg, "$5"),
+                query: {},
+                hash: url.replace(/([^#]*)(?:#|)(.*)/, "$2")
+            };
+            if (/\?/.test(url)) {
+                ret.query = JSON.parse(parse(url.split("?")[1].split("#")[0]));
+            }
+
+            return ret;
+        };
+    }
+    else {
+        // TO DO
+        // Create transfer interface for node
+    }
+
+    Phuel.fn.extend({
+        url: Url
+    });
+
+})();
