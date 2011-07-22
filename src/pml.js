@@ -1,4 +1,5 @@
-/// <reference path="main.js" />
+/// <reference path="main.reference.js" />
+/// <reference path="manager/classes/database.js" />
 /* 
  * Author: Blaine Jester
  * Phuel Markup Language Interpreter
@@ -33,7 +34,6 @@ tag meta $db(235) $db(236);
 ==============================================
 
 */
-
 (function () {
 
     var global = this;
@@ -59,7 +59,12 @@ tag meta $db(235) $db(236);
         "import": function () {
             var args = arguments, len = args.length, ret = "";
             for (var i = 0; i < len; i++) {
-                ret += '<script type="text/javascript" src="http://srv.blainejester.com/deps/' + args[i] + '"></script>';
+                if (args[i].split(".").pop() == "js") {
+                    ret += '<script type="text/javascript" src="http://srv.blainejester.com/deps/' + args[i] + '"></script>';
+                }
+                else {
+                    ret += '<link rel="stylesheet" type="text/css" href="http://srv.blainejester.com/deps/' + args[i] + '" />';
+                }
             }
             return ret;
         },
@@ -255,3 +260,4 @@ tag meta $db(235) $db(236);
     });
 
 })();
+
