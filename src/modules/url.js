@@ -1,5 +1,5 @@
-/// <reference path="../main.js" />
-/// <reference path="../json.js" />
+/// <reference path="..\main.js" />
+/// <reference path="..\json.js" />
 /* 
 * Author: Blaine Jester
 * Phuel Url Parser
@@ -19,6 +19,10 @@
 
     var isN = Phuel.fn.isN;
     var json = Phuel.fn.json;
+    var copy = Phuel.fn.copy;
+    var nurl;
+
+    var reg = /(http)(s|):\/\/([\w\d\.]*\.(\w{1,3}))(\/.*)(\?|#|)(.*)/;
 
     var parse = function (M) {
         return '{' + M.replace(/([\w\d]*)=([^&]*)/g, '"$1":"$2"').replace(/&/g, ",") + '}'; ;
@@ -32,7 +36,6 @@
             if (isN(url)) {
                 url = window.location.href;
             }
-            var reg = /(http)(s|):\/\/([\w\d\.]*\.(\w{1,3}))(\/.*)(\?|#)(.*)/;
             var ret = {
                 secure: (url.replace(reg, "$2") == "s"),
                 tld: url.replace(reg, "$4"),
@@ -51,6 +54,23 @@
     else {
         // TO DO
         // Create transfer interface for node
+        nurl = require('url');
+        var Url = function (url) {
+            /// <summary>Parses a url or the current one</summary>
+            /// <param name="url" type="string" optional="true">The url to parse, defaults to window.location.href</param>
+            /// <returns type="object">An object containing url data</returns>
+            if (isN(url)) {
+                //url = request.url; No access to request
+            }
+            var purl = nurl.parse(url, true);
+            var ret = copy(purl,{
+                secure: (purl.href.replace(reg, "$2") == "s"),
+                tld: purl.href.replace(reg, "$4"),
+                domain: purl.href.replace(reg, "$3"),
+                hash: purl.hash.substring(1)
+            },true);
+            return ret;
+        };
     }
 
     Phuel.fn.extend({
