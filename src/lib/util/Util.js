@@ -70,9 +70,9 @@ Util.isSet = function(test)
   try
   {
     var isSet = (
-      typeof test != "undefined" 
-      && test != undefined 
-      && test != null
+      typeof test !== "undefined" 
+      && test !== undefined 
+      && test !== null
     );
   }
   catch (exception)
@@ -95,9 +95,10 @@ Util.isEmpty = function(test)
   {
     var isEmpty = (
       !Util.isSet(test)
-      || (Util.type(test) == 'string' && test != '')
-      || (Util.type(test) == 'array' && test.length > 0)
-      || (Util.type(test) == 'boolean' && test)
+      || (Util.type(test) === 'string' && test === '')
+      || (Util.type(test) === 'array' && test.length === 0)
+      || (Util.type(test) === 'boolean' && !test)
+      || (Util.type(test) === 'number' && test === 0)
     );
   }
   catch (exception)
@@ -106,31 +107,6 @@ Util.isEmpty = function(test)
   }
 
   return isEmpty;
-};
-
-/**
- * Determines if variable is of 'type'
- *
- * @param {Mixed} type
- * @param {Mixed} test
- * @return {Bool}
- */
-Util.is = function(type, test)
-{
-  switch (Util.type(type))
-  {
-    case 'string':
-      return Util.type(test) === type;
-      break;
-    case 'function':
-      if (Util.type(test) === 'object') 
-      {
-        return (test instanceof type);
-      }
-      break;
-  }
-  
-  return false;
 };
 
 /**

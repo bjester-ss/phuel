@@ -5,12 +5,12 @@
   "homepage": "http://www.phuelframework.org",
   "repository": {
     "type": "git",
-    "url": "phiosdev.com:/extr/git/phios.phuel.git"
+    "url": "github.com:jesterb/Phuel.git"
   },
   "author": "Blaine Jester <me@blainejester.com>",
   "main": "./src",
-  "dependencies": {
-    "pg": "0.7.0",
-    "constants": "0.0.1"
+  "dependencies": {}, 
+  "devDependencies": {
+    "mocha": "*"
   } 
 }
