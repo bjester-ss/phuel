@@ -1,0 +1,16 @@
+{ "name": "phuel",
+  "version": "0.1.0",
+  "description": "A powerful MVC framework, reminiscent of Symfony",
+  "keywords": ["mvc", "orm", "framework", "web", "database", "sql"],
+  "homepage": "http://www.phuelframework.org",
+  "repository": {
+    "type": "git",
+    "url": "phiosdev.com:/extr/git/phios.phuel.git"
+  },
+  "author": "Blaine Jester <me@blainejester.com>",
+  "main": "./src",
+  "dependencies": {
+    "pg": "0.7.0",
+    "constants": "0.0.1"
+  } 
+}
