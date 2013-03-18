@@ -5,13 +5,33 @@
  */
 
 // Require the Phuel environment, and start loading components
-require('./env.js');
+console.log('>> Loading environment...');
+  require('./env.js');
+console.log('>> Done!');
 
-var logger = Phuel.Core.getLogger();
+var util = Phuel.Lib.Util,
+    logger = Phuel.Core.getLogger();
 
-var standard = util.generateDirectoryTree('./lib', { exclude: [/^\./] });
+var library = util.generateDirectoryTree(Phuel.ROOT_DIR + '/lib', { 
+  exclude: [/^\./] 
+});
 
-for (var fileName in standard)
+logger.info('Generated directory tree, preparing for loading classes');
+
+var load = function(dir)
 {
-  logger.debug(standard[fileName]);
-}
+  for (var fileName in dir)
+  {
+    if (util.isObject(dir[fileName]))
+    {
+      logger.info('Recursing into directory: ' + fileName);
+      load(dir[fileName]);
+      continue;
+    }
+    
+    logger.info('Loading from: ' + fileName);
+  }
+};
+
+load(library);
+

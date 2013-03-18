@@ -12,6 +12,11 @@ var Logger = Phuel.Lib.Util.Logger,
  */
 var Core = {};
 
+/**
+ * Creates the logger
+ * 
+ * @returns {Logger}
+ */
 Core.getLogger = function()
 {
   if (loggerInstance !== null)
@@ -22,7 +27,12 @@ Core.getLogger = function()
   return loggerInstance =  new Logger('/var/tmp/node.log');
 };
 
-Core.registerBundle = function()
+/**
+ * 
+ * @param {Bundle} bundle
+ * @returns {undefined}
+ */
+Core.registerBundle = function(bundle)
 {
   
 };

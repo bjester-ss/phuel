@@ -33,6 +33,7 @@ var define = pfUtil.define(Logger);
 // Class constants
 define('ENTRY', '[%s] [%s] %s');
 define('LEVEL_DEBUG', 'debug');
+define('LEVEL_INFO', 'info');
 define('LEVEL_NOTICE', 'notice');
 define('LEVEL_WARNING', 'warning');
 define('LEVEL_ERROR', 'error');
@@ -78,6 +79,8 @@ Logger.prototype.__construct = function(path)
 //      me.emit('write', me.queue[i]);
 //    }
 //  });
+
+  this.info('Logger started, writing to ' + path);
 };
 
 /**
@@ -94,13 +97,13 @@ Logger.prototype.write = function(msg, level)
         date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
       );
   
-  msg = util.format(Logger.ENTRY, dateFormat.join(' '), 
-    (level || Logger.LEVEL_NOTICE), msg);
-  
   if (!pfUtil.isString(msg))
   {
     msg = JSON.stringify(msg);
   }
+  
+  msg = util.format(Logger.ENTRY, dateFormat.join(' '), 
+    (level || Logger.LEVEL_NOTICE), msg);
   
   this.emit('write', msg);
   return this;
@@ -115,6 +118,17 @@ Logger.prototype.write = function(msg, level)
 Logger.prototype.debug = function(msg)
 {
   return this.write(msg, Logger.LEVEL_DEBUG);
+};
+
+/**
+ * Logs a message at info level
+ *
+ * @param {String} msg
+ * @return {Logger}
+ */
+Logger.prototype.info = function(msg)
+{
+  return this.write(msg, Logger.LEVEL_INFO);
 };
 
 /**
