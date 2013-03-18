@@ -5,6 +5,8 @@ Phuel is designed with straightforward implementation in mind. It aims to
 make it easy develop API's or websites quickly with Node.js, without getting
 in the way of your code.  Have fun!
 
+[![Build Status](https://secure.travis-ci.org/jesterb/Phuel.png)](http://travis-ci.org/jesterb/Phuel)
+
 ## How to use
 
 ```js

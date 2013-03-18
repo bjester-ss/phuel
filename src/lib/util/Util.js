@@ -160,8 +160,18 @@ Util.coalesce = function()
   return null;
 };
 
+/**
+ * 
+ * @param {type} method
+ * @param {type} src
+ * @param {type} dest
+ * @param {type} atomic
+ * @returns {undefined}
+ */
 Util.wrap = function(method, src, dest, atomic)
 {
+  throw new Error('Not implemented', 'Util.js', 173);
+  
   atomic = Util.coalesce(atomic, false);
 
   if (Util.isFunction(src[method]) || Util.isFunction(dest[method]))
@@ -195,7 +205,7 @@ Util.extend = function(to, from, overwrite, recurse, callback)
     
     if (recurse && Util.isObject(to[k]) && Util.isObject(from[k]))
     {
-      set = Util.copy(to[k], from[k], overwrite, true);
+      set = Util.extend(to[k], from[k], overwrite, true);
     }
     
     if (overwrite || !(k in to)) {to[k] = callback(to, k, set);}
