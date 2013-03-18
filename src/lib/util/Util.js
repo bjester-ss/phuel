@@ -189,6 +189,7 @@ Util.wrap = function(method, src, dest, atomic)
  * @param {Object} from Object to copy from
  * @param {Bool} overwrite Whether or not overwrite items in the object
  * @param {Bool} recurse Boolean whether not to deep copy
+ * @param {Function} callback on overwrite, sent the destination object, key and value to set
  * @return {Object} The modified 'to' object
  */
 Util.extend = function(to, from, overwrite, recurse, callback) 
@@ -221,8 +222,16 @@ Util.extend = function(to, from, overwrite, recurse, callback)
  * @param {String|Int} key The key of the destination
  * @param {Mixed} val The value that will be set
  */
-Util._extend = function(dest, key, val) {return val};
+Util._extend = function(dest, key, val) { return val; };
 
+/**
+ * Unsets value and returns it, it would be similar to Array.pop, but any index
+ * and works on objects
+ * 
+ * @param {Object} obj
+ * @param {Number|String} key
+ * @returns {mixed}
+ */
 Util.unset = function(obj, key) 
 { 
   var val = obj[key]; 

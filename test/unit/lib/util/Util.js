@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    util = require('../../../src/lib/util/Util.js').Util;
+    util = require('../../../../src/lib/util/Util.js').Util;
 
 /**
  * 
@@ -266,5 +266,41 @@ describe('Util.extend', function()
     base.a.b = 'b';
     assert.notDeepEqual(base, from, 'not entirely deeply extended to base');
   });
+  
+  it('should overwrite when the callback returns a different value', function()
+  {
+    var base = {a: 'a'}, baseCopy = util.extend({}, base);
+    var from = {a: 'b'};
+    
+    assert.deepEqual(base, util.extend(baseCopy, from, true, false, function(to, key)
+    { 
+      return to[key];
+    }), 'override overwrite');
+    
+    assert.notDeepEqual(base, util.extend(baseCopy, from, true, false, function()
+    { 
+      return null;
+    }), 'overwrite with null');
+    
+    assert.strictEqual(null, baseCopy.a, 'null value');
+  });
 });
 
+/**
+ * @test Phuel.Lib.Util.unset
+ */
+describe('Util.unset', function()
+{
+  it('should modify and return', function()
+  {
+    var test = {a: 'a', b: 'b', c: 'c'}, testCopy = util.extend({}, test);
+    
+    assert.deepEqual(test, testCopy, 'demonstrate they are the same');
+    assert.equal('c', util.unset(testCopy, 'c'), 'return value at key c');
+    assert.equal(undefined, testCopy['c'], 'value no longer exists');
+    assert.equal(undefined, util.unset(testCopy, 'x'), 'no value to unset');
+    
+    util.unset(test, 'c');
+    assert.deepEqual(testCopy, test, 'both are modified the same way now');
+  });
+});
