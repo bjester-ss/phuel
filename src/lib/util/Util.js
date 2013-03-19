@@ -239,7 +239,8 @@ Util.unset = function(obj, key)
 };
 
 /**
- * Copies an object or objects.  Allows dynamic list of arguments to copy
+ * Copies an object or objects.  Allows dynamic list of arguments to copy, props
+ * are copied from right to left. Adding a overwrite param, it will reverse this
  * 
  * @param {Object} objects Dynamic list of objects to extend
  * @param {Bool} overwrite Whether or not overwrite items in the object
@@ -248,14 +249,28 @@ Util.unset = function(obj, key)
  */
 Util.copy = function()
 {
-  var copy = {}, l = arguments.length, a = arguments,
-    overwrite = Util.coalesce(Util.unset(a, l-1), true),
-    recurse = Util.coalesce(Util.unset(a, l-1), true);
+  var copy = {},
+      args = Util.argsToArray(arguments).reverse(), 
+      length = args.length, 
+      overwrite = false, 
+      recurse = false,
+      argsDone = false;
   
-  for (var i = 0; i < l; i++)
+  for (var i = 0, arg = args[i]; i < length; i++, arg = args[i])
   {
-    if (!Util.isSet(a[i])) { continue; }
-    copy = Util.extend(copy, a[i], overwrite, recurse);
+    if (!argsDone && !Util.isObject(arg))
+    {
+      recurse = overwrite;
+      overwrite = arg;
+      continue;
+    }
+    
+    // If we got this far, stop looking for bool args
+    argsDone = true;
+    
+    if (!Util.isSet(arg)) { continue; }
+    
+    Util.extend(copy, arg, overwrite, recurse);
   }
   
   return copy;
@@ -284,16 +299,20 @@ Util.include = function(namespace, file)
 Util.generateDirectoryTree = function(dir, options, __recurse)
 {
   dir = nj.path.resolve(dir);
-  __recurse = Util.coalesce(__recurse, false);
+  options = (options || {});
+  __recurse = (__recurse || false);
+  
   var stat = nj.fs.statSync(dir), s;
   
   if (!Util.isSet(stat) || !stat.isDirectory())
   {
-    return (__recurse) ? dir : (s = {}, s[nj.path.basename(dir)] = dir, s);
+    return (__recurse) 
+      ? dir 
+      : (s = {}, s[nj.path.basename(dir)] = dir, s);
   }
   
-  var tree = {};
-  var files = nj.fs.readdirSync(dir);
+  var tree = {},
+      files = nj.fs.readdirSync(dir);
   
   for (var key in files)
   {

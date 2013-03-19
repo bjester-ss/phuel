@@ -304,3 +304,91 @@ describe('Util.unset', function()
     assert.deepEqual(testCopy, test, 'both are modified the same way now');
   });
 });
+
+/**
+ * @test Phuel.Lib.Util.copy
+ */
+describe('Util.copy', function()
+{
+  it('should create a copy', function()
+  {
+    var test = {a: 'a', b: 'b', c: 'c'}, copy = util.copy(test);
+    
+    assert.deepEqual(test, copy, 'it is a copy');
+    
+    // But it is not affected 
+    copy.a = 'x';
+    assert.notEqual(test.a, copy.a, 'it is a copy, and not a reference');
+  });
+  
+  it('should copy multiple', function()
+  {
+    var first = {a: 'a'}, snd = {a: 'x', b: 'b'}, copy = util.copy(first, snd);
+    assert.deepEqual({a: 'x', b: 'b'}, copy, 'copy multiple with right preferred');
+    
+    copy = util.copy(first, snd, {b: 'x'});
+    assert.deepEqual({a: 'x', b: 'x'}, copy, 'copy multiple without again');
+  });
+  
+  it('should copy multiple with out overwriting', function()
+  {
+    var first = {a: 'a'}, snd = {a: 'x', b: 'b'}, copy = util.copy(first, snd, true);
+    assert.deepEqual({a: 'a', b: 'b'}, copy, 'copy multiple with left preferred');
+    
+    copy = util.copy(first, snd, {b: 'x'}, true);
+    assert.deepEqual({a: 'a', b: 'b'}, copy, 'copy multiple without again');
+  });
+});
+
+/**
+ * 
+ * @test Util.generateDirectoryTree
+ */
+describe('Util.generateDirectoryTree', function()
+{
+  var fileSplit = __filename.split('/'),
+      file = fileSplit.pop();
+  
+  it('should find this file', function()
+  {
+    var tree = util.generateDirectoryTree(__dirname);
+    assert.equal(__filename, tree[file], 'check if file is in this');
+  });
+  
+  it('should generate a tree recursively and consistently', function()
+  {
+    var parentDir = fileSplit.pop(), 
+        tree = util.generateDirectoryTree(fileSplit.join('/'));
+    assert.deepEqual(util.generateDirectoryTree(__dirname), 
+      tree[parentDir], 'check recursion into parent dir, and matches itself');
+  });
+});
+
+/**
+ * 
+ * @test Util.define
+ */
+describe('Util.define', function()
+{
+  it('should return a function to define constants on an object', function()
+  {
+    var test = {},
+        define = util.define(test);
+    
+    define('TEST', 'testtesttest');
+    assert.strictEqual(undefined, global['TEST'], 'globally its not defined');
+    assert.strictEqual('testtesttest', test.TEST, 'on local object its defined');
+    
+    test.TEST = null;
+    assert.strictEqual('testtesttest', test.TEST, 'value doesnt change');
+  });
+  
+  it('should export constant globally', function()
+  {
+    util.define('TEST', 'testtesttest');
+    assert.strictEqual('testtesttest', TEST, 'exported globally');
+    
+    TEST = null;
+    assert.strictEqual('testtesttest', TEST, 'value doesnt change');
+  });
+});

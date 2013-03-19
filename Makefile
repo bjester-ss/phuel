@@ -5,7 +5,7 @@
 tester = mocha
 
 test:
-	@NODE_PATH=./lib:$NODE_PATH $(tester) -R spec test/unit/lib/*/*
+	@NODE_PATH=./lib:$NODE_PATH $(tester) -R spec --globals TEST test/unit/lib/*/*
 
 check: test
 
